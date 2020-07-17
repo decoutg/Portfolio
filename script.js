@@ -1,38 +1,54 @@
+var canvas;
+var context;
+
 var player;
+var posX = 0;
+var posY = 0;
+
+var tileSize = 40;
+
+/*var secondsPassed;
+var oldTimeStamp;
+var fps;*/
+
+window.onload = startGame;
 
 function startGame() {
-    game.start();
-    player = new component(30, 30, "red", 10, 120);
+    canvas = document.getElementById('canvas');
+    context = canvas.getContext('2d');
+    window.requestAnimationFrame(gameLoop);
 }
 
-var game = {
-    canvas : document.createElement("canvas"),
-    start : function() {
-        this.canvas.width = 480;
-        this.canvas.height = 270;
-        this.context = this.canvas.getContext("2d");
-        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-        this.interval = setInterval(updateGameArea, 20);
-    },
-    clear : function() {
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    }
+function gameLoop(timeStamp) {
+    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    update();
+    draw();
+    //frameController(timeStamp);
+    window.requestAnimationFrame(gameLoop);
 }
 
-function component(width, height, color, x, y) {
-    this.width = width;
-    this.height = height;
-    this.x = x;
-    this.y = y;
-    this.update = function(){
-        ctx = game.context;
-        ctx.fillStyle = color;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
-    }
+function draw(){
+    context.fillStyle = 'red';
+    context.fillRect(posX, posY, tileSize, tileSize);
 }
 
-function updateGameArea() {
-    game.clear();
-    player.x += 1;
-    player.update();
+function update() {
+    posX += 1;
+    posY += 1;
 }
+
+/*function frameController(timeStamp) {
+    // Calculate the number of seconds passed since the last frame
+    secondsPassed = (timeStamp - oldTimeStamp) / 1000;
+    oldTimeStamp = timeStamp;
+
+    // Calculate fps
+    fps = Math.round(1 / secondsPassed);
+
+    // Draw number to the screen
+    context.fillStyle = 'white';
+    context.fillRect(0, 0, 200, 100);
+    context.font = '25px Arial';
+    context.fillStyle = 'black';
+    context.fillText("FPS: " + fps, 10, 30);
+}*/
