@@ -1,24 +1,26 @@
 var canvas;
 var context;
+var video;
 var frame = 0;
 
 // player Button
-var posX1 = 0;
-var posX2 = 100;
-var posX3 = 200;
-var posX4 = 300;
-var posY1 = 525;
+var posX1 = 340;
+var posX2 = 440;
+var posX3 = 540;
+var posX4 = 640;
+var posY1 = 645;
 var widthButton = 100;
 var heightButton = 75;
-var colorRed = 'red';
-var colorGreen = 'green';
+var colorRed = 'rgba(255, 0, 0, 0.4)';
+var colorGreen = 'rgba(0, 255, 0, 0.4)';
+var colorGrey = 'rgba(43, 43, 43, 0.3)';
 
 //notes
 var note;
 var noteTab = [];
-var respawn = 50;
+var respawn = 86;
 var randomSpawn;
-var posX = 30;
+var posX = 370;
 var posY = 0;
 var tileSize = 40;
 var colorBlue = 'blue';
@@ -30,22 +32,51 @@ var fps;*/
 window.onload = startGame;
 
 function startGame() {
+    video = document.getElementById("video");
     canvas = document.getElementById('canvas');
     context = canvas.getContext('2d');
+    /*video.addEventListener('play', function() {
+    
+    });*/
+    printMoovie();
     window.requestAnimationFrame(gameLoop);
 }
 
+function playVideo() {
+    video.play();
+}
+
+function pauseVideo() {
+    video.pause();
+}
+
+function resetVideo() {
+    video.pause();
+    video.currentTime = 0;
+}
+
+function printMoovie() {
+    context.drawImage(video, 0, 0, 1080, 720);
+    setTimeout(printMoovie, 0);
+}
+
 function gameLoop(timeStamp) {
-    frame++;
-    update();
-    draw(timeStamp);
+    if (video.currentTime != 0) {
+        update();
+        draw(timeStamp);
+        frame++;
+    }
     window.requestAnimationFrame(gameLoop);
 }
 
 function draw(timeStamp){
-    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    //context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     //frameController(timeStamp);
+
+    //background
+    context.fillStyle = colorGrey;
+    context.fillRect(340, 0, 400, 720);
 
     //touches du jeu
     context.fillStyle = colorRed;
@@ -64,27 +95,32 @@ function draw(timeStamp){
 
     //cordes et délimitations
     context.fillStyle = 'black';
-    context.fillRect(0, 0, 2, 600);
-    context.fillRect(98, 0, 4, 600);
-    context.fillRect(198, 0, 4, 600);
-    context.fillRect(298, 0, 4, 600);
-    context.fillRect(398, 0, 2, 600);
-    context.fillRect(0, 525, 400, 4);
+    context.fillRect(338, 0, 4, 720);
+    context.fillRect(438, 0, 4, 720);
+    context.fillRect(538, 0, 4, 720);
+    context.fillRect(638, 0, 4, 720);
+    context.fillRect(738, 0, 4, 720);
+    context.fillRect(340, 645, 400, 4);
 }
 
 function update() {
-    if (frame % respawn == 0) {
-        randomSpawn = Math.floor(Math.random() * 4);
-        note = new component(30 + (randomSpawn*100), -tileSize, colorBlue, tileSize, tileSize);
-        noteTab.push(note);
+    if (frame == 0) {
+        setTimeout(spawnNote, 450);
     }
 
     noteTab.forEach((item, index) => {
         item.y += 4;
-        if (item.y > 600) {
+        if (item.y > 720) {
             noteTab.splice(index, 1);
         }
     })
+}
+
+function spawnNote() {
+    randomSpawn = Math.floor(Math.random() * 4);
+    note = new component(posX + (randomSpawn*100), -tileSize, colorBlue, tileSize, tileSize);
+    noteTab.push(note);
+    setTimeout(spawnNote, 2298);
 }
 
 function component(x, y, color, width, height) {

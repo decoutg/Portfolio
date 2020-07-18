@@ -7,9 +7,19 @@
   <script src="script.js"></script>
 </head>
 <body>
-  <canvas id="canvas" width="400" height="600" style="border:1px solid lightgrey;">
-    Your browser does not support the HTML5 canvas tag.
-  </canvas>
-  <p>coucou, voici notre jeu vraiment trop génial</p>
+  <button onclick="playVideo()" type="button">Play Video</button>
+  <button onclick="pauseVideo()" type="button">Pause Video</button>
+  <button onclick="resetVideo()" type="button">Reset Video</button>
+  <p>il va falloir une paire d'ecouteur !! :)</p>
+  <div>
+    <video id="video" src="./animeSong.mp4" type="video/mp4" hidden>
+      Your browser does not support this Video
+    </a>
+  </div>
+  <div>
+    <canvas id="canvas" width="1080" height="720" style="border:1px solid lightgrey;">
+      Your browser does not support the HTML5 canvas tag.
+    </canvas>
+  </div>
 </body>
 </html>
