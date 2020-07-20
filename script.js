@@ -20,6 +20,7 @@ var heightButton = 75;
 var colorRed = 'rgba(255, 0, 0, 0.4)';
 var colorGreen = 'rgba(0, 255, 0, 0.4)';
 var colorGrey = 'rgba(43, 43, 43, 0.3)';
+var colorOrange = 'rgba(255, 69, 0, 0.4)';
 
 //notes
 var note;
@@ -27,10 +28,20 @@ var noteTab = [];
 var respawn = 86;
 var randomSpawn;
 var repeted = 8;
+var combo = 0;
 var posX = 370;
 var posY = 0;
 var tileSize = 40;
 var colorBlue = 'blue';
+var indice = 0;
+var rythmeTable = [1, 1, 2, 2, 1, 1, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 2, 2, 4, 4, 2, 4, 4, 2, 4, 4, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 8, 8, 8, 4, 1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8];
+
+//game
+var score = 0;
+var life = 10;
+var badHaut = 0;
+var badBas = 0;
+var touch = false;
 
 //control
 var rightPressed = false;
@@ -50,10 +61,10 @@ function startGame() {
     canvas = document.getElementById('canvas');
     context = canvas.getContext('2d');
 
-    rightButton = new component(640, 650, colorRed, 100, 75);
-    rightMidButton = new component(540, 650, colorRed, 100, 75);
-    leftMidButton = new component(440, 650, colorRed, 100, 75);
-    leftButton = new component(340, 650, colorRed, 100, 75);
+    rightButton = new component(640, 630, colorRed, 100, 40);
+    rightMidButton = new component(540, 630, colorRed, 100, 40);
+    leftMidButton = new component(440, 630, colorRed, 100, 40);
+    leftButton = new component(340, 630, colorRed, 100, 40);
     window.requestAnimationFrame(gameLoop);
 }
 
@@ -80,6 +91,8 @@ function gameLoop(timeStamp) {
 
     document.addEventListener("keydown", keyDownHandler, false);
     document.addEventListener("keyup", keyUpHandler, false);
+
+    console.log(noteTab);
 
     if (video.currentTime != 0) {
         update();
@@ -120,9 +133,6 @@ function draw(timeStamp){
         context.fillStyle = colorBlue;
         context.fillRect(item.x, item.y, item.width, item.height);
     })
-    if (noteTab.length > 0) {
-        console.log(noteTab[0].height);
-    }
 
     //cordes et délimitations
     context.fillStyle = 'black';
@@ -131,70 +141,149 @@ function draw(timeStamp){
     context.fillRect(538, 0, 4, 720);
     context.fillRect(638, 0, 4, 720);
     context.fillRect(738, 0, 4, 720);
-    context.fillRect(340, 645, 400, 4);
+
+    context.fillRect(340, 645, 30, 6);
+    context.fillRect(410, 645, 60, 6);
+    context.fillRect(510, 645, 60, 6);
+    context.fillRect(610, 645, 60, 6);
+    context.fillRect(710, 645, 30, 6);
 
     frameController(timeStamp);
+
+    context.font = '25px Arial';
+    context.fillStyle = 'red';
+    context.fillText("SCORE: " + score, 10, 60);
+    context.fillText("LIFE: " + life, 10, 90);
+    context.fillText("BADHAUT: " + badHaut, 10, 120);
+    context.fillText("BADBAS: " + badBas, 10, 150);
+    context.fillText("COMBO: " + combo, 10, 180);
 }
 
 function update() {
     if (frame == 0) {
-        setTimeout(spawnNote, 1850);
+        setTimeout(spawnNote, 1780);
     }
 
     noteTab.forEach((item, index) => {
         item.y += 10;
-        if (item.y > 720) {
-            noteTab.splice(index, 1);
-        }
     })
+    if (noteTab[0] != null) {
+        if (noteTab[0].y > 720) {
+            life -= 1;
+            combo = 0;
+            noteTab.splice(0, 1);
+        }
+    }
 }
 
 function keyDownHandler(e) {
-    if(e.key == "m" || e.key == "M") {
+    if(e.key == "k" || e.key == "K") {
+        if (rightPressed == false) {
+            //rightButton.color = colorGreen;
+            collision(rightButton);
+        }
         rightPressed = true;
-        rightButton.color = colorGreen;
     }
-    else if(e.key == "l" || e.key == "L") {
+    else if(e.key == "j" || e.key == "J") {
+        if (rightMidPressed == false) {
+            //rightMidButton.color = colorGreen;
+            collision(rightMidButton);
+        }
         rightMidPressed = true;
-        rightMidButton.color = colorGreen;
     }
-    else if(e.key == "s" || e.key == "S") {
+    else if(e.key == "f" || e.key == "F") {
+        if (leftMidPressed == false) {
+            //leftMidButton.color = colorGreen;
+            collision(leftMidButton);
+        }
         leftMidPressed = true;
-        leftMidButton.color = colorGreen;
     }
-    else if(e.key == "q" || e.key == "Q") {
+    else if(e.key == "d" || e.key == "D") {
+        if (leftPressed == false) {
+            //leftButton.color = colorGreen;
+            collision(leftButton);
+        }
         leftPressed = true;
-        leftButton.color = colorGreen;
     }
+    document.removeEventListener("keydown", keyDownHandler, false);
 }
 
 function keyUpHandler(e) {
-    if(e.key == "m" || e.key == "M") {
+    if(e.key == "k" || e.key == "K") {
         rightPressed = false;
         rightButton.color = colorRed;
     }
-    else if(e.key == "l" || e.key == "L") {
+    else if(e.key == "j" || e.key == "J") {
         rightMidPressed = false;
         rightMidButton.color = colorRed;
     }
-    else if(e.key == "s" || e.key == "S") {
+    else if(e.key == "f" || e.key == "F") {
         leftMidPressed = false;
         leftMidButton.color = colorRed;
     }
-    else if(e.key == "q" || e.key == "Q") {
+    else if(e.key == "d" || e.key == "D") {
         leftPressed = false;
         leftButton.color = colorRed;
     }
+    document.removeEventListener("keyup", keyUpHandler, false);
+}
+
+function collision(button) {
+    
+        if ((button.x + 30) == noteTab[0].x) {
+            if (noteTab[0].y >= 600 && noteTab[0].y <= 650) {
+                touch = true;
+                combo += 1;
+                score += (300*combo);
+                noteTab.splice(0, 1);
+                button.color = colorGreen;
+            }
+            else if (noteTab[0].y >= 570 && noteTab[0].y <= 680) {
+                touch = true;
+                combo += 1;
+                score += (100*combo);
+                noteTab.splice(0, 1);
+                button.color = colorOrange;
+            }
+            else if (noteTab[0].y < 650) {
+                badHaut += 1;
+                touch = true;
+                life -= 1;
+                combo = 0;
+                noteTab.splice(0, 1);
+            }
+            else if (noteTab[0].y > 650) {
+                badBas += 1;
+                touch = true;
+                life -= 1;
+                combo = 0;
+                noteTab.splice(0, 1);
+            }
+        }
+        else {
+            life -= 1;
+            combo = 0;
+            noteTab.splice(0, 1);
+        }
+        if ((combo%5 == 0) && combo != 0) {
+            life += 1;
+            if (life > 10) {
+                life = 10;
+            }
+        }
 }
 
 function spawnNote() {
-    randomSpawn = Math.floor(Math.random() * 4);
-    note = new component(posX + (randomSpawn*100), -tileSize, colorBlue, tileSize, tileSize);
-    noteTab.push(note);
-    if (video.currentTime == 0) {
-        return;
+    if (indice < rythmeTable.length) {
+        randomSpawn = Math.floor(Math.random() * 4);
+        note = new component(posX + (randomSpawn*100), -tileSize, colorBlue, tileSize, tileSize);
+        noteTab.push(note);
+        if (video.currentTime == 0) {
+            return;
+        }
+        indice += 1;
+        setTimeout(spawnNote, 2308.6*(1/rythmeTable[indice-1]));
     }
-    setTimeout(spawnNote, 2310*(1/repeted));
 }
 
 function component(x, y, color, width, height) {
@@ -213,7 +302,6 @@ function frameController(timeStamp) {
     // Calculate fps
     fps = Math.round(1 / secondsPassed);
 
-    // Draw number to the screen
     context.font = '25px Arial';
     context.fillStyle = 'red';
     context.fillText("FPS: " + fps, 10, 30);
