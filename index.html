@@ -8,13 +8,19 @@
 </head>
 <body>
   <button onclick="playVideo()" type="button">Play Video</button>
+  <button onclick="playSong()" type="button">Play Song</button>
   <button onclick="pauseVideo()" type="button">Pause Video</button>
   <button onclick="resetVideo()" type="button">Reset Video</button>
-  <p>il va falloir une paire d'ecouteur !! :)</p>
+  <p>il va falloir une paire d'ecouteur !! :)  Les touches du jeu sont Q, S, L et M pour jouer</p>
+  <p>il est préférable de jouer sans la vidéo si les fps ne sont pas constant entre 60 et 62 au risque d'avoir un jeu qui ne soit pas en rythme avec la musique</p>
+  <p>(alors go sur chrome pour jouer en mode vidéo ;p)</p>
   <div>
     <video id="video" src="./animeSong.mp4" type="video/mp4" hidden>
       Your browser does not support this Video
     </a>
+  </div>
+  <div>
+    <img id="image" src="./animeIMG.png" alt="Your browser does not support this Image" hidden>
   </div>
   <div>
     <canvas id="canvas" width="1080" height="720" style="border:1px solid lightgrey;">
