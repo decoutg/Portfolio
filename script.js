@@ -3,52 +3,51 @@ var context;
 var image;
 var video;
 var playingVideo = true;
-var frame = 0;
 
 // player Button
-var posX1 = 340;
-var posX2 = 440;
-var posX3 = 540;
-var posX4 = 640;
-var posY1 = 645;
 var rightButton;
 var rightMidButton;
 var leftMidButton;
 var leftButton;
 var widthButton = 100;
 var heightButton = 75;
-var colorRed = 'rgba(255, 0, 0, 0.4)';
+
+//color Game
+var colorRed = 'rgba(255, 0, 0, 1)';
 var colorGreen = 'rgba(0, 255, 0, 0.4)';
 var colorGrey = 'rgba(43, 43, 43, 0.3)';
 var colorOrange = 'rgba(255, 69, 0, 0.4)';
+var colorBlue = 'rgba(0, 0, 255, 1)';
+var colorBlack = 'rgba(0, 0, 0, 1)'
 
-//notes
+//game
 var note;
 var noteTab = [];
-var respawn = 86;
+var begin = false;
 var randomSpawn;
-var repeted = 8;
-var combo = 0;
-var posX = 370;
-var posY = 0;
 var tileSize = 40;
-var colorBlue = 'blue';
 var indice = 0;
 var rythmeTable = [1, 1, 2, 2, 1, 1, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 8, 8, 8, 4, 1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 4, 8, 2, 4, 4, 2, 4, 4, 2, 4, 4, 2, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4, 2, 4, 4, 2, 4, 4, 2, 8, 8, 8, 8, 8, 8, 8, 8, 2, 4, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4, 4, 4, 4, 4, 2, 2, 4, 4, 4, 4, 2, 2, 4, 4, 4, 4, 2, 2, 4, 4, 4, 4, 2, 2, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1, 1];
 
-//game
-var score = 0;
-var life = 10;
-var badHaut = 0;
-var badBas = 0;
-var touch = false;
+var timer;
+var startTime = 0;
+var ifFirstLoop = true;
+var firstLoop = 1850;
+var timerLoop = 2308.3;
+var pause = false;
+
+
+//hud
+var scoreHud;
 
 //control
 var rightPressed = false;
 var rightMidPressed = false;
 var leftMidPressed = false;
 var leftPressed = false;
+var spacePressed = false;
 
+//fps
 var secondsPassed;
 var oldTimeStamp;
 var fps;
@@ -65,27 +64,10 @@ function startGame() {
     rightMidButton = new component(540, 630, colorRed, 100, 40);
     leftMidButton = new component(440, 630, colorRed, 100, 40);
     leftButton = new component(340, 630, colorRed, 100, 40);
+
+    scoreHud = new hud(0, 10, 0, 0, 0, 0, 0);
+
     window.requestAnimationFrame(gameLoop);
-}
-
-function playVideo() {
-    playingVideo = true;
-    video.play();
-}
-
-function playSong() {
-    playingVideo = false;
-    video.play();
-}
-
-function pauseVideo() {
-    video.pause();
-}
-
-function resetVideo() {
-    video.pause();
-    indice = 0;
-    video.currentTime = 0;
 }
 
 function gameLoop(timeStamp) {
@@ -93,21 +75,14 @@ function gameLoop(timeStamp) {
     document.addEventListener("keydown", keyDownHandler, false);
     document.addEventListener("keyup", keyUpHandler, false);
 
-    console.log(noteTab);
+    frameController(timeStamp);
+    update();
+    draw();
 
-    if (video.currentTime != 0) {
-        update();
-        draw(timeStamp);
-        frame++;
-    }
-    else {
-        frame = 0;
-        noteTab = [];
-    }
     window.requestAnimationFrame(gameLoop);
 }
 
-function draw(timeStamp){
+function draw(){
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     if (playingVideo) {
@@ -136,7 +111,7 @@ function draw(timeStamp){
     })
 
     //cordes et délimitations
-    context.fillStyle = 'black';
+    context.fillStyle = colorBlack;
     context.fillRect(338, 0, 4, 720);
     context.fillRect(438, 0, 4, 720);
     context.fillRect(538, 0, 4, 720);
@@ -149,30 +124,37 @@ function draw(timeStamp){
     context.fillRect(610, 645, 60, 6);
     context.fillRect(710, 645, 30, 6);
 
-    frameController(timeStamp);
-
+    // HUD
     context.font = '25px Arial';
-    context.fillStyle = 'red';
-    context.fillText("SCORE: " + score, 10, 60);
-    context.fillText("LIFE: " + life, 10, 90);
-    context.fillText("BADHAUT: " + badHaut, 10, 120);
-    context.fillText("BADBAS: " + badBas, 10, 150);
-    context.fillText("COMBO: " + combo, 10, 180);
+    context.fillStyle = colorRed;
+    context.fillText("FPS: " + fps, 10, 30);
+    context.fillText("SCORE: " + scoreHud.score, 10, 60);
+    context.fillText("LIFE: " + scoreHud.life, 10, 90);
+    context.fillText("FAIL: " + scoreHud.fail, 10, 120);
+    context.fillText("COMBO: " + scoreHud.combo, 10, 150);
+    context.fillText("COMBO MAX: " + scoreHud.comboMax, 10, 180);
+    context.fillText("PERFECT: " + scoreHud.perfect, 10, 210);
+    context.fillText("MEDIUM: " + scoreHud.medium, 10, 240);
 }
 
 function update() {
-    if (frame == 0) {
-        setTimeout(spawnNote, 1780);
+    if (begin) {
+        startTime = (new Date()).getTime();
+        timer = setTimeout(spawnNote, firstLoop);
+        begin = false;
     }
 
-    noteTab.forEach((item, index) => {
-        item.y += 10;
-    })
-    if (noteTab[0] != null) {
-        if (noteTab[0].y > 720) {
-            life -= 1;
-            combo = 0;
-            noteTab.splice(0, 1);
+    if (!pause) {
+        noteTab.forEach((item, index) => {
+            item.y += 10;
+        })
+        if (noteTab[0] != null) {
+            if (noteTab[0].y > 720) {
+                scoreHud.life -= 1;
+                scoreHud.fail +=1;
+                scoreHud.combo = 0;
+                noteTab.splice(0, 1);
+            }
         }
     }
 }
@@ -206,6 +188,18 @@ function keyDownHandler(e) {
         }
         leftPressed = true;
     }
+    else if(e.key == " ") {
+        if (spacePressed == false) {
+            resetGame();
+        }
+        spacePressed = true;
+    }
+    else if(e.key == "a") {
+        pauseGame();
+    }
+    else if(e.key == "z") {
+        playGame();
+    }
     document.removeEventListener("keydown", keyDownHandler, false);
 }
 
@@ -226,6 +220,9 @@ function keyUpHandler(e) {
         leftPressed = false;
         leftButton.color = colorRed;
     }
+    else if(e.key == " ") {
+        spacePressed = false;
+    }
     document.removeEventListener("keyup", keyUpHandler, false);
 }
 
@@ -233,41 +230,46 @@ function collision(button) {
     
         if ((button.x + 30) == noteTab[0].x) {
             if (noteTab[0].y >= 600 && noteTab[0].y <= 650) {
-                touch = true;
-                combo += 1;
-                score += (300*combo);
+                scoreHud.combo += 1;
+                if (scoreHud.combo > scoreHud.comboMax) {
+                    scoreHud.comboMax = scoreHud.combo;
+                }
+                scoreHud.score += (300*scoreHud.combo);
+                scoreHud.perfect += 1;
                 noteTab.splice(0, 1);
                 button.color = colorGreen;
             }
             else if (noteTab[0].y >= 570 && noteTab[0].y <= 680) {
-                touch = true;
-                combo += 1;
-                score += (100*combo);
+                scoreHud.combo += 1;
+                if (scoreHud.combo > scoreHud.comboMax) {
+                    scoreHud.comboMax = scoreHud.combo;
+                }
+                scoreHud.score += (100*scoreHud.combo);
+                scoreHud.medium += 1;
                 noteTab.splice(0, 1);
                 button.color = colorOrange;
             }
             else if (noteTab[0].y < 650) {
-                badHaut += 1;
-                touch = true;
-                life -= 1;
-                combo = 0;
+                scoreHud.fail += 1;
+                scoreHud.life -= 1;
+                scoreHud.combo = 0;
             }
             else if (noteTab[0].y > 650) {
-                badBas += 1;
-                touch = true;
-                life -= 1;
-                combo = 0;
+                scoreHud.fail += 1;
+                scoreHud.life -= 1;
+                scoreHud.combo = 0;
                 noteTab.splice(0, 1);
             }
         }
         else {
-            life -= 1;
-            combo = 0;
+            scoreHud.life -= 1;
+            scoreHud.fail +=1;
+            scoreHud.combo = 0;
         }
-        if ((combo%5 == 0) && combo != 0) {
-            life += 1;
-            if (life > 10) {
-                life = 10;
+        if ((scoreHud.combo%5 == 0) && scoreHud.combo != 0) {
+            scoreHud.life += 1;
+            if (scoreHud.life > 10) {
+                scoreHud.life = 10;
             }
         }
 }
@@ -275,14 +277,65 @@ function collision(button) {
 function spawnNote() {
     if (indice <= rythmeTable.length) {
         randomSpawn = Math.floor(Math.random() * 4);
-        note = new component(posX + (randomSpawn*100), -tileSize, colorBlue, tileSize, tileSize);
+        note = new component(370 + (randomSpawn*100), -tileSize, colorBlue, tileSize, tileSize);
         noteTab.push(note);
         if (video.currentTime == 0) {
             return;
         }
         indice += 1;
-        setTimeout(spawnNote, 2308.6*(1/rythmeTable[indice-1]));
+        startTime = (new Date()).getTime();
+        ifFirstLoop = false;
+        timer = setTimeout(spawnNote, timerLoop*(1/rythmeTable[indice-1]));
     }
+}
+
+function frameController(timeStamp) {
+    // Calculate the number of seconds passed since the last frame
+    secondsPassed = (timeStamp - oldTimeStamp) / 1000;
+    oldTimeStamp = timeStamp;
+
+    // Calculate fps
+    fps = Math.round(1 / secondsPassed);
+}
+
+function playVideo() {
+    playingVideo = true;
+}
+
+function playImage() {
+    playingVideo = false;
+}
+
+function playGame() {
+    if (pause == true) {
+        video.play();
+        pause = false;
+        begin = true;
+    }
+}
+
+function pauseGame() {
+    video.pause();
+    pause = true;
+    if (ifFirstLoop) {
+        firstLoop = firstLoop - ((new Date()).getTime() - startTime);
+    }
+    else {
+        firstLoop = timerLoop - ((new Date()).getTime() - startTime);
+    }
+    clearTimeout(timer);
+}
+
+function resetGame() {
+    video.play();
+    indice = 0;
+    firstLoop = 1850;
+    pause = false;
+    begin = true;
+    noteTab = [];
+    video.currentTime = 0;
+    clearTimeout(timer);
+    scoreHud = new hud(0, 10, 0, 0, 0, 0, 0);
 }
 
 function component(x, y, color, width, height) {
@@ -293,15 +346,12 @@ function component(x, y, color, width, height) {
     this.color = color;
 }
 
-function frameController(timeStamp) {
-    // Calculate the number of seconds passed since the last frame
-    secondsPassed = (timeStamp - oldTimeStamp) / 1000;
-    oldTimeStamp = timeStamp;
-
-    // Calculate fps
-    fps = Math.round(1 / secondsPassed);
-
-    context.font = '25px Arial';
-    context.fillStyle = 'red';
-    context.fillText("FPS: " + fps, 10, 30);
+function hud(score, life, combo, comboMax, fail, perfect, medium) {
+    this.score = score;
+    this.life = life;
+    this.combo = combo;
+    this.comboMax = comboMax;
+    this.fail = fail;
+    this.perfect = perfect;
+    this.medium = medium;
 }
