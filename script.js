@@ -179,6 +179,7 @@ function draw(){
     context.fillText("COMBO MAX: " + scoreHud.comboMax, 10, 180);
     context.fillText("PERFECT: " + scoreHud.perfect, 10, 210);
     context.fillText("MEDIUM: " + scoreHud.medium, 10, 240);
+    context.fillText("BAD: " + scoreHud.bad, 10, 270);
 }
 
 function drawMenu() {
